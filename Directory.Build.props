@@ -5,9 +5,10 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>AzureTable.Provider</RootNamespace>
+		<SonarAnalyzerVersion>10.15.0.120848</SonarAnalyzerVersion>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="SonarAnalyzer.CSharp" Version="10.*">
+		<PackageReference Include="SonarAnalyzer.CSharp" Version="$(SonarAnalyzerVersion)">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
