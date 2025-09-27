@@ -7,7 +7,7 @@
 		<RootNamespace>AzureTable.Provider</RootNamespace>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="SonarAnalyzer.CSharp" Version="*">
+		<PackageReference Include="SonarAnalyzer.CSharp" Version="10.*">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
