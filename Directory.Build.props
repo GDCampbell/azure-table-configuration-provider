@@ -1,8 +1,16 @@
 <Project>
-  <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
-  <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
+	<PropertyGroup>
+		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>AzureTable.Provider</RootNamespace>
+		<SonarAnalyzerVersion>10.15.0.120848</SonarAnalyzerVersion>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="SonarAnalyzer.CSharp" Version="$(SonarAnalyzerVersion)">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
 </Project>
