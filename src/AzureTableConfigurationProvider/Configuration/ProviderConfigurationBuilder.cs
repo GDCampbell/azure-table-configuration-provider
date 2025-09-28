@@ -1,4 +1,4 @@
-﻿using Azure.Data.Tables;
+using Azure.Data.Tables;
 using AzureTable.Provider.Configuration.Mapping;
 using AzureTable.Provider.Query;
 using Microsoft.Extensions.Configuration;
@@ -17,7 +17,12 @@ public sealed class ProviderConfigurationBuilder<TEntity> where TEntity : class,
     /// </summary>
     /// <param name="tableClientFactory">A delegate that takes an IConfiguration and returns a TableClient instance. Cannot be null.</param>
     /// <returns>The current ProviderConfigurationBuilder<TEntity> instance for method chaining.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if the provided tableClientFactory is null.</exception>
+    /// <summary>
+    /// Configures the factory used to create a TableClient from an IConfiguration instance.
+    /// </summary>
+    /// <param name="tableClientFactory">A function that produces a <see cref="TableClient"/> given an <see cref="IConfiguration"/>.</param>
+    /// <returns>The current <see cref="ProviderConfigurationBuilder{TEntity}"/> instance for method chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="tableClientFactory"/> is null.</exception>
     public ProviderConfigurationBuilder<TEntity> ConfigureTableFactory(Func<IConfiguration, TableClient> tableClientFactory)
     {
         ArgumentNullException.ThrowIfNull(tableClientFactory);
@@ -32,7 +37,12 @@ public sealed class ProviderConfigurationBuilder<TEntity> where TEntity : class,
     /// <param name="mappingBuilder">An action that receives a configuration mapper builder and the current configuration, allowing custom mapping
     /// logic to be defined. Cannot be null.</param>
     /// <returns>The current <see cref="ProviderConfigurationBuilder{TEntity}"/> instance for method chaining.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if the provided mappingBuilder is null.</exception>
+    /// <summary>
+    /// Sets the delegate that configures how configuration values map to a TEntity instance.
+    /// </summary>
+    /// <param name="mappingBuilder">A delegate that configures a <see cref="ConfigurationMapperBuilder{TEntity}"/> using an <see cref="IConfiguration"/>.</param>
+    /// <returns>The same <see cref="ProviderConfigurationBuilder{TEntity}"/> instance to allow method chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="mappingBuilder"/> is null.</exception>
     public ProviderConfigurationBuilder<TEntity> ConfigureMapping(Action<ConfigurationMapperBuilder<TEntity>, IConfiguration> mappingBuilder)
     {
         ArgumentNullException.ThrowIfNull(mappingBuilder);
@@ -47,7 +57,12 @@ public sealed class ProviderConfigurationBuilder<TEntity> where TEntity : class,
     /// <param name="queryConfiguration">An action that receives a <see cref="TableQueryConfiguration"/> object to customize query behavior. Cannot be
     /// null.</param>
     /// <returns>The current <see cref="ProviderConfigurationBuilder{TEntity}"/> instance for method chaining.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if the provided queryConfiguration is null.</exception>
+    /// <summary>
+    /// Sets the optional table query configuration to apply when building the provider.
+    /// </summary>
+    /// <param name="queryConfiguration">An action that configures a <see cref="TableQueryConfiguration"/> instance.</param>
+    /// <returns>The same <see cref="ProviderConfigurationBuilder{TEntity}"/> instance for method chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="queryConfiguration"/> is null.</exception>
     public ProviderConfigurationBuilder<TEntity> ConfigureQuery(Action<TableQueryConfiguration> queryConfiguration)
     {
         // The query configuration is optional but if they're calling this method, then it shouldn't be null.
@@ -56,6 +71,11 @@ public sealed class ProviderConfigurationBuilder<TEntity> where TEntity : class,
         return this;
     }
 
+    /// <summary>
+    /// Creates a ProviderConfiguration<TEntity> from the configured table client factory, mapping builder, and optional query configuration.
+    /// </summary>
+    /// <returns>The constructed ProviderConfiguration&lt;TEntity&gt; containing the configured TableClientFactory, MappingBuilder, and QueryConfiguration (if provided).</returns>
+    /// <exception cref="InvalidOperationException">Thrown if TableClientFactory or MappingBuilder have not been configured; the exception message lists the missing configuration(s).</exception>
     internal ProviderConfiguration<TEntity> Build()
     {
         if (_tableClientFactory is not null && _mappingBuilder is not null)
@@ -101,6 +121,12 @@ internal sealed class ProviderConfiguration<TEntity> where TEntity : class, ITab
     public required Action<ConfigurationMapperBuilder<TEntity>, IConfiguration> MappingBuilder { get; init; }
     public Action<TableQueryConfiguration>? QueryConfiguration { get; init; }
 
+    /// <summary>
+    /// Deconstructs the provider configuration into its constituent factory, mapping builder, and optional query configuration.
+    /// </summary>
+    /// <param name="tableClientFactory">Receives the configured function that creates a TableClient from an IConfiguration.</param>
+    /// <param name="mappingBuilder">Receives the configured mapping action that populates a ConfigurationMapperBuilder for TEntity using an IConfiguration.</param>
+    /// <param name="queryConfiguration">Receives the optional action that configures TableQueryConfiguration, or null if not configured.</param>
     public void Deconstruct(out Func<IConfiguration, TableClient> tableClientFactory,
         out Action<ConfigurationMapperBuilder<TEntity>, IConfiguration> mappingBuilder,
         out Action<TableQueryConfiguration>? queryConfiguration)

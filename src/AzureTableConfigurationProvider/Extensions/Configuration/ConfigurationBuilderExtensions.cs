@@ -1,4 +1,4 @@
-﻿using Azure.Data.Tables;
+using Azure.Data.Tables;
 using AzureTable.Provider.Configuration;
 using Microsoft.Extensions.Configuration;
 
@@ -37,7 +37,13 @@ public static class ConfigurationBuilderExtensions
     /// <param name="configure">A delegate to configure the Azure Table Storage provider options for the specified entity type.</param>
     /// <returns>The configuration builder with the Azure Table Storage configuration source added.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="builder"/> or <paramref name="configure"/> are null.</exception>
-    /// <exception cref="InvalidOperationException">Thrown if the configuration source cannot be added due to misconfiguration.</exception>
+    /// <summary>
+    /// Adds an Azure Table Storage configuration source for entities of type <typeparamref name="TEntity"/> to the configuration builder.
+    /// </summary>
+    /// <param name="builder">The configuration builder to add the Azure Table source to.</param>
+    /// <param name="configure">A delegate that configures the table-to-configuration mapping and provider options for <typeparamref name="TEntity"/>.</param>
+    /// <returns>The original <see cref="IConfigurationBuilder"/> with the Azure Table configuration source added.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="builder"/> or <paramref name="configure"/> is null.</exception>
     public static IConfigurationBuilder AddAzureTableConfiguration<TEntity>(
         this IConfigurationBuilder builder,
         Action<ProviderConfigurationBuilder<TEntity>> configure)
@@ -84,7 +90,13 @@ public static class ConfigurationBuilderExtensions
     /// <see cref="InvalidOperationException"/> if no tables are added.</param>
     /// <returns>The configuration builder with all the Azure Table Storage configuration sources added.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="builder"/> or <paramref name="configure"/> are null.</exception>
-    /// <exception cref="InvalidOperationException">Thrown if the configuration source cannot be added due to misconfiguration.</exception>
+    /// <summary>
+    /// Adds one or more Azure Table configuration sources configured via the provided delegate to the given <see cref="IConfigurationBuilder"/>.
+    /// </summary>
+    /// <param name="configure">A delegate that populates an <see cref="AzureTableConfigurationBuilder"/> with table mappings to be added as configuration sources.</param>
+    /// <returns>The original <see cref="IConfigurationBuilder"/> with the new Azure Table configuration sources added.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="configure"/> or the <paramref name="builder"/> instance is null.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the delegate does not produce any table configuration sources to add.</exception>
     public static IConfigurationBuilder AddAzureTableConfiguration(
         this IConfigurationBuilder builder,
         Action<AzureTableConfigurationBuilder> configure)

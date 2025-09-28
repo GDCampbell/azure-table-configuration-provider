@@ -1,9 +1,15 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 
 namespace AzureTable.Provider.Extensions;
 
 internal static class ExpressionExtensions
 {
+    /// <summary>
+    /// Extracts the member or indexer key name referenced by the provided lambda expression.
+    /// </summary>
+    /// <param name="expression">A lambda expression that accesses a member or an indexer (e.g., x => x.Property or x => x["key"]).</param>
+    /// <returns>The member name or the indexer key string referenced by the expression.</returns>
+    /// <exception cref="ArgumentException">Thrown when the expression is not a member access, a unary-wrapped member access, or a supported indexer access, or when an indexer argument is not a string constant.</exception>
     public static string GetMemberName<T, U>(this Expression<Func<T, U>> expression)
     {
         if (expression.Body is MemberExpression memberExpression)
