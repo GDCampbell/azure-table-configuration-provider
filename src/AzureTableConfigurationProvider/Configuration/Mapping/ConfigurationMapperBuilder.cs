@@ -69,13 +69,13 @@ public sealed class ConfigurationMapperBuilder<TEntity> : IConfigurationMapper<T
 
     private ConfigurationMapperBuilder(MappingKeySection<TEntity> section) => _section = section;
 
-    public IConfigurationMapper<TEntity> AddSection(string name, Action<IConfigurationMapper<TEntity>> configure)
+    public IConfigurationMapper<TEntity> AddSection(string key, Action<IConfigurationMapper<TEntity>> configure)
     {
-        name = name?.Trim() ?? string.Empty;
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        key = key?.Trim() ?? string.Empty;
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
         ArgumentNullException.ThrowIfNull(configure);
 
-        return AddSection(new MappingStaticKeySection<TEntity>(name), configure, name);
+        return AddSection(new MappingStaticKeySection<TEntity>(key), configure, key);
     }
 
     public IConfigurationMapper<TEntity> AddSection<TKey>(Expression<Func<TEntity, TKey>> keyExpression, Action<IConfigurationMapper<TEntity>> configure) where TKey : notnull
