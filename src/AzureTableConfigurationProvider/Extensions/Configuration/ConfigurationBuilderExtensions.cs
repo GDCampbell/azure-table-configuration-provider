@@ -46,7 +46,7 @@ public static class ConfigurationBuilderExtensions
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentNullException.ThrowIfNull(configure);
-                
+
         return builder.Add(new AzureTableConfigurationSource<TEntity>(builder.Build(), configure));
     }
 
@@ -95,9 +95,17 @@ public static class ConfigurationBuilderExtensions
 
         var configurationSnapshot = builder.Build();
 
+        var any = false;
+
         foreach (var source in tableBuilder.Build(configurationSnapshot))
         {
+            any = true;
             builder.Add(source);
+        }
+
+        if (!any)
+        {
+            throw new InvalidOperationException($"No table configurations were added. Ensure at least one table is configured in the {nameof(configure)} delegate by calling {nameof(AzureTableConfigurationBuilder)}.{nameof(AzureTableConfigurationBuilder.AddTable)}.");
         }
 
         return builder;
