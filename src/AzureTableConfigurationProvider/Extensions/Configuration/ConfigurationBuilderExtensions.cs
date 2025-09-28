@@ -9,9 +9,8 @@ public static class ConfigurationBuilderExtensions
     /// <summary>
     /// Adds Azure Table Storage as a configuration source to the specified configuration builder.
     /// </summary>
-    /// <remarks>Use this method to load configuration values from Azure Table Storage, enabling dynamic
-    /// configuration updates from a table. This method supports custom entity types for advanced mapping
-    /// scenarios.
+    /// <remarks>Use this method to load configuration values from Azure Table Storage.
+    /// This method supports custom entity types for advanced mapping scenarios.
     /// 
     /// <strong>Important:</strong> Configuration providers must be added in the correct order. This method
     /// creates a snapshot of the current configuration state, so it can only access values from providers
