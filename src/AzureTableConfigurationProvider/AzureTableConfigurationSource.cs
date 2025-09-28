@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 namespace AzureTable.Provider;
 
 internal sealed class AzureTableConfigurationSource<TEntity>(
+    IConfiguration configurationSnapshot,
     Action<ProviderConfigurationBuilder<TEntity>> configure
     ) 
     : IConfigurationSource 
@@ -14,18 +15,16 @@ internal sealed class AzureTableConfigurationSource<TEntity>(
 {
     public IConfigurationProvider Build(IConfigurationBuilder builder)
     {
-        var configuration = builder.Build();
-
         var providerBuilder = new ProviderConfigurationBuilder<TEntity>();
         configure(providerBuilder);
 
         var (tableFactory, mappingBuilderConfiguration, queryConfiguration) = providerBuilder.Build();
 
-        var tableClient = tableFactory(configuration);
+        var tableClient = tableFactory(configurationSnapshot);
         
         var mappingBuilder = new ConfigurationMapperBuilder<TEntity>();
 
-        mappingBuilderConfiguration(mappingBuilder, configuration);
+        mappingBuilderConfiguration(mappingBuilder, configurationSnapshot);
 
         var mappingRoot = mappingBuilder.Build();
 
