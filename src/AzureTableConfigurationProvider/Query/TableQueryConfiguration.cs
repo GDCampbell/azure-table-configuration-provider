@@ -17,7 +17,7 @@ public sealed class TableQueryConfiguration
         {
             if (value <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(value), "MaxPerPage must be greater than zero.");
+                throw new ArgumentOutOfRangeException(nameof(MaxPerPage), "MaxPerPage must be greater than zero.");
             }
             _maxPerPage = value;
         }
