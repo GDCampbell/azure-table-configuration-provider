@@ -23,7 +23,6 @@ internal static class ExpressionExtensions
                 return argument switch
                 {
                     ConstantExpression constantExpression when constantExpression.Value is string str => str,
-                    MemberExpression argMemberExpression => argMemberExpression.Member.Name,
                     _ => throw new ArgumentException("Unsupported argument type in indexer expression.", nameof(expression))
                 };
             }
