@@ -11,11 +11,15 @@ internal interface ITraversableMappingElement<T>
 internal interface IMappingSection<T>
 {
     void Add(ITraversableMappingElement<T> element);
+    bool HasElements { get; }
 }
 
 internal abstract class MappingSection<T> : IMappingSection<T> where T : class
 {
     protected readonly List<ITraversableMappingElement<T>> _elements = [];
+
+    public bool HasElements => _elements.Count > 0;
+
     public void Add(ITraversableMappingElement<T> element)
     {
         _elements.Add(element);

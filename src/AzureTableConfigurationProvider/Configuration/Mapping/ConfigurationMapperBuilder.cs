@@ -1,5 +1,6 @@
 ﻿using Azure.Data.Tables;
 using AzureTable.Provider.Configuration.Mapping.Elements;
+using AzureTable.Provider.Extensions;
 using System.Linq.Expressions;
 
 namespace AzureTable.Provider.Configuration.Mapping;
@@ -58,15 +59,15 @@ public sealed class ConfigurationMapperBuilder<TEntity> : IConfigurationMapper<T
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentNullException.ThrowIfNull(configure);
 
-        return AddSection(new MappingStaticKeySection<TEntity>(name), configure);
+        return AddSection(new MappingStaticKeySection<TEntity>(name), configure, name);
     }
 
     public IConfigurationMapper<TEntity> AddSection<TKey>(Expression<Func<TEntity, TKey>> keyExpression, Action<IConfigurationMapper<TEntity>> configure)
     {
         ArgumentNullException.ThrowIfNull(keyExpression);
         ArgumentNullException.ThrowIfNull(configure);
-
-        return AddSection(MappingDynamicKeySection<TEntity>.Create(keyExpression), configure);
+        
+        return AddSection(MappingDynamicKeySection<TEntity>.Create(keyExpression), configure, keyExpression.GetMemberName());
     }
 
     public IConfigurationMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue>> valueExpression, string? nameOverride = null)
@@ -87,10 +88,16 @@ public sealed class ConfigurationMapperBuilder<TEntity> : IConfigurationMapper<T
 
     internal MappingRootSection<TEntity> Build() => ((IConfigurationMapperBuilder<TEntity>)this).Build();
 
-    private ConfigurationMapperBuilder<TEntity> AddSection(MappingKeySection<TEntity> section, Action<IConfigurationMapper<TEntity>> configure)
+    private ConfigurationMapperBuilder<TEntity> AddSection(MappingKeySection<TEntity> section, Action<IConfigurationMapper<TEntity>> configure, string sectionName)
     {
         var builder = new ConfigurationMapperBuilder<TEntity>(section);
         configure(builder);
+
+        if (!section.HasElements)
+        {
+            throw new InvalidOperationException($"Configured section \"{sectionName}\" must have at least one child element.");
+        }
+
         _section.Add(section);
         return this;
     }
