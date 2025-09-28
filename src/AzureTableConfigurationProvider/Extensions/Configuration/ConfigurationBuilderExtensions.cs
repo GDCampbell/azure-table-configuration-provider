@@ -81,7 +81,7 @@ public static class ConfigurationBuilderExtensions
     /// <param name="builder">The configuration builder to which the Azure Table Storage configuration sources will be added.</param>
     /// <param name="configure">A delegate to configure multiple table mappings using the provided builder.</param>
     /// <returns>The configuration builder with all the Azure Table Storage configuration sources added.</returns>
-    /// /// <exception cref="ArgumentNullException">Thrown if <paramref name="builder"/> or <paramref name="configure"/> are null.</exception>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="builder"/> or <paramref name="configure"/> are null.</exception>
     /// <exception cref="InvalidOperationException">Thrown if the configuration source cannot be added due to misconfiguration.</exception>
     public static IConfigurationBuilder AddAzureTableConfiguration(
         this IConfigurationBuilder builder,
