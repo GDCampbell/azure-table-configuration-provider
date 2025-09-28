@@ -29,7 +29,7 @@ internal abstract class MappingSection<T> : IMappingSection<T> where T : class
 internal sealed class MappingRootSection<T> : MappingSection<T> where T : class
 {
     public IEnumerable<KeyValuePair<string, string?>> ExtractFrom(T instance)
-        => _elements.Count > 0
+        => HasElements
         ? _elements.SelectMany(e => e.ExtractFrom(instance, SectionPath.Root))
         : throw new InvalidOperationException("Root level must have at least one child element.");
 }
@@ -38,7 +38,7 @@ internal abstract class MappingKeySection<T>(Func<T, string> keyFactory) : Mappi
 {
     public IEnumerable<KeyValuePair<string, string?>> ExtractFrom(T instance, SectionPath currentPath)
     {
-        if (_elements.Count == 0)
+        if (!HasElements)
         {
             throw new InvalidOperationException("Key section must have at least one child element.");
         }
