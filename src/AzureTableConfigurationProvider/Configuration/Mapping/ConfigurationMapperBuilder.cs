@@ -8,7 +8,7 @@ namespace AzureTable.Provider.Configuration.Mapping;
 public partial interface IConfigurationMapper<TEntity> where TEntity : class, ITableEntity
 {
     /// <summary>
-    /// Adds a new configuration section with the specified name and applies the provided configuration action to it.
+    /// Adds a new configuration section with the specified key and applies the provided configuration action to it.
     /// </summary>
     /// <remarks>
     /// <para>Note: Mapped configuration keys may include ':' to represent hierarchy; this is intentional and supported by the configuration system.</para>
@@ -16,9 +16,9 @@ public partial interface IConfigurationMapper<TEntity> where TEntity : class, IT
     /// <param name="key">The key of the configuration section to add. Cannot be null or empty.</param>
     /// <param name="configure">An action that configures the newly added section. Cannot be null.</param>
     /// <returns>The current <see cref="IConfigurationMapper{TEntity}"/> instance to allow method chaining.</returns>
-    /// <exception cref="ArgumentException">Thrown if <paramref name="name"/> is null, empty, or white space.</exception>
+    /// <exception cref="ArgumentException">Thrown if <paramref name="key"/> is null, empty, or white space.</exception>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="configure"/> is null.</exception>
-    IConfigurationMapper<TEntity> AddSection(string name, Action<IConfigurationMapper<TEntity>> configure);
+    IConfigurationMapper<TEntity> AddSection(string key, Action<IConfigurationMapper<TEntity>> configure);
     /// <summary>
     /// Adds a configuration section for the specified key and applies additional configuration to it.
     /// </summary>
@@ -27,8 +27,9 @@ public partial interface IConfigurationMapper<TEntity> where TEntity : class, IT
     /// <para>Note: Mapped configuration keys may include ':' to represent hierarchy; this is intentional and supported by the configuration system.</para>
     /// </remarks>
     /// <typeparam name="TKey">The type of the key used to identify the configuration section. Must be a non-nullable type.</typeparam>
-    /// <param name="keyExpression">An expression that specifies the key property of the entity to which the configuration section applies. Value of 
-    /// property for the entity will be used as the key. Cannot be null.</param>
+    /// <param name="keyExpression">An expression that specifies the key property of the entity. 
+    /// The property value will be extracted from each entity instance, converted to a string, 
+    /// and used as the configuration section key. Cannot be null.</param>
     /// <param name="configure">An action that configures the newly added section. The provided mapper is used to define additional
     /// configuration for the section. Cannot be null.</param>
     /// <returns>The current configuration mapper instance, allowing for method chaining.</returns>
