@@ -43,7 +43,7 @@ internal abstract class MappingKeySection<T>(Func<T, string> keyFactory) : Mappi
             throw new InvalidOperationException("Key section must have at least one child element.");
         }
 
-        var key = keyFactory(instance);
+        var key = keyFactory(instance).Trim();
 
         var newPath = currentPath.AddSegment(key);
 
@@ -67,7 +67,7 @@ internal sealed class MappingDynamicKeySection<T>: MappingKeySection<T> where T 
             var rawValue = compiled(instance);
 
             return rawValue is not null &&
-                    rawValue.ToString() is string strValue &&
+                    rawValue.ToString()?.Trim() is string strValue &&
                     !string.IsNullOrWhiteSpace(strValue)
                     ? strValue
                     : throw new InvalidOperationException($"Value for {expression.GetMemberName()} cannot be null, empty, or whitespace when used as a section key.");
@@ -87,9 +87,15 @@ internal sealed class MappingValueElement<T> : ITraversableMappingElement<T> whe
 
     public static MappingValueElement<T> Create<TValue>(Expression<Func<T, TValue>> expression, string? nameOverride = null)
     {
-        var name = string.IsNullOrWhiteSpace(nameOverride)
+        var name = (string.IsNullOrWhiteSpace(nameOverride)
             ? expression.GetMemberName()
-            : nameOverride;
+            : nameOverride)
+            .Trim();
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Name cannot be null, empty, or whitespace.", nameof(nameOverride));
+        }
 
         var compiled = expression.Compile();
 

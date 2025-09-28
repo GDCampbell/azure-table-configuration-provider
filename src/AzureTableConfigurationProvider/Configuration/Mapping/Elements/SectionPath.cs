@@ -11,6 +11,7 @@ internal sealed class SectionPath
 
     public SectionPath AddSegment(string segment)
     {
+        segment = segment?.Trim() ?? string.Empty;
         ArgumentException.ThrowIfNullOrWhiteSpace(segment);
 
         return new(string.IsNullOrWhiteSpace(Path) ? segment : $"{Path}:{segment}");

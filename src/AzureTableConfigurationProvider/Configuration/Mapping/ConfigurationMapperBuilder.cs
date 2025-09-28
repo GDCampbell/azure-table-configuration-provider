@@ -56,6 +56,7 @@ public sealed class ConfigurationMapperBuilder<TEntity> : IConfigurationMapper<T
 
     public IConfigurationMapper<TEntity> AddSection(string name, Action<IConfigurationMapper<TEntity>> configure)
     {
+        name = name?.Trim() ?? string.Empty;
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentNullException.ThrowIfNull(configure);
 
