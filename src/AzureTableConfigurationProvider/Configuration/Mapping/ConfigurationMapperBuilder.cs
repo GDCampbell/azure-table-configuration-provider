@@ -39,6 +39,15 @@ public partial interface IConfigurationMapper<TEntity> where TEntity : class, IT
     /// Configures the mapper to use the specified value expression for mapping an entity property, optionally
     /// overriding the default property name.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Property values are converted to strings using culture-invariant formatting to ensure consistent 
+    /// configuration values that can be parsed reliably across different locales. For types implementing 
+    /// <see cref="IFormattable"/> (such as <see cref="decimal"/>, <see cref="double"/>, 
+    /// <see cref="DateTime"/>), <see cref="CultureInfo.InvariantCulture"/> is used. Null values are 
+    /// preserved as null in the configuration.
+    /// </para>
+    /// </remarks>
     /// <typeparam name="TValue">The type of the property value to be mapped.</typeparam>
     /// <param name="valueExpression">An expression that specifies the property of the entity to map.</param>
     /// <param name="nameOverride">An optional name to use instead of the default property name. If null, the property name from the expression is

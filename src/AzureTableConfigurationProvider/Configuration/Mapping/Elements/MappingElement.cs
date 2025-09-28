@@ -97,7 +97,17 @@ internal sealed class MappingValueElement<T> : ITraversableMappingElement<T> whe
 
         var compiled = expression.Compile();
 
-        string? ValueFactory(T instance) => compiled(instance)?.ToString();
+        string? ValueFactory(T instance)
+        {
+            var value = compiled(instance);
+
+            return value switch
+            {
+                IFormattable fmt => fmt.ToString(null, CultureInfo.InvariantCulture),
+                not null => value.ToString(),
+                _ => null
+            };
+        }
 
         return new(name, ValueFactory);
     }
