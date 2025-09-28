@@ -89,9 +89,9 @@ public sealed class ConfigurationMapperBuilder<TEntity> : IConfigurationMapper<T
 
     private ConfigurationMapperBuilder<TEntity> AddSection(MappingKeySection<TEntity> section, Action<IConfigurationMapper<TEntity>> configure)
     {
-        _section.Add(section);
         var builder = new ConfigurationMapperBuilder<TEntity>(section);
         configure(builder);
+        _section.Add(section);
         return this;
     }
 }
