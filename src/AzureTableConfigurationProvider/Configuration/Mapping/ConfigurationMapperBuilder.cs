@@ -10,7 +10,10 @@ public partial interface IConfigurationMapper<TEntity> where TEntity : class, IT
     /// <summary>
     /// Adds a new configuration section with the specified name and applies the provided configuration action to it.
     /// </summary>
-    /// <param name="name">The name of the configuration section to add. Cannot be null or empty.</param>
+    /// <remarks>
+    /// <para>Note: Mapped configuration keys may include ':' to represent hierarchy; this is intentional and supported by the configuration system.</para>
+    /// </remarks>
+    /// <param name="key">The key of the configuration section to add. Cannot be null or empty.</param>
     /// <param name="configure">An action that configures the newly added section. Cannot be null.</param>
     /// <returns>The current <see cref="IConfigurationMapper{TEntity}"/> instance to allow method chaining.</returns>
     /// <exception cref="ArgumentException">Thrown if <paramref name="name"/> is null, empty, or white space.</exception>
@@ -20,7 +23,9 @@ public partial interface IConfigurationMapper<TEntity> where TEntity : class, IT
     /// Adds a configuration section for the specified key and applies additional configuration to it.
     /// </summary>
     /// <remarks>Use this method to organize configuration by logical sections based on a key property. This
-    /// is useful for grouping related configuration settings for different parts of an entity.</remarks>
+    /// is useful for grouping related configuration settings for different parts of an entity.
+    /// <para>Note: Mapped configuration keys may include ':' to represent hierarchy; this is intentional and supported by the configuration system.</para>
+    /// </remarks>
     /// <typeparam name="TKey">The type of the key used to identify the configuration section. Must be a non-nullable type.</typeparam>
     /// <param name="keyExpression">An expression that specifies the key property of the entity to which the configuration section applies. Value of 
     /// property for the entity will be used as the key. Cannot be null.</param>
