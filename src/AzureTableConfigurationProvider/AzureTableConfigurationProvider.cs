@@ -13,6 +13,12 @@ internal sealed class AzureTableConfigurationProvider<TEntity>(
     where TEntity : class, ITableEntity
 {
 
+    /// <summary>
+    /// Loads configuration entries from Azure Table Storage and replaces the provider's data with them.
+    /// </summary>
+    /// <remarks>
+    /// Clears the existing Data dictionary and populates it with the key/value pairs extracted from table entities.
+    /// </remarks>
     public override void Load()
     {
         var data = LoadEntitiesAsync().GetAwaiter().GetResult();
@@ -25,6 +31,10 @@ internal sealed class AzureTableConfigurationProvider<TEntity>(
         }
     }
 
+    /// <summary>
+    /// Retrieves entities from the configured table, maps each entity into key/value configuration entries, and returns the combined results.
+    /// </summary>
+    /// <returns>A case-insensitive dictionary of configuration keys to their string values (values may be <c>null</c>) populated from the mapped table entities.</returns>
     private async Task<IDictionary<string, string?>> LoadEntitiesAsync()
     {
         var results = query?.Filter switch
