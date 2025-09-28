@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace AzureTable.Provider.Configuration.Mapping.Elements;
 
-internal interface ITraversableMappingElement<T> 
+internal interface ITraversableMappingElement<T>
 {
     IEnumerable<KeyValuePair<string, string?>> ExtractFrom(T instance, SectionPath currentPath);
 }
@@ -53,21 +53,19 @@ internal abstract class MappingKeySection<T>(Func<T, string> keyFactory) : Mappi
 
 internal sealed class MappingStaticKeySection<T>(string key) : MappingKeySection<T>(_ => key) where T : class;
 
-internal sealed class MappingDynamicKeySection<T>: MappingKeySection<T> where T : class
+internal sealed class MappingDynamicKeySection<T> : MappingKeySection<T> where T : class
 {
     private MappingDynamicKeySection(Func<T, string> keyFactory)
         : base(keyFactory) { }
 
-    public static MappingDynamicKeySection<T> Create<TKey>(Expression<Func<T, TKey>> expression)
+    public static MappingDynamicKeySection<T> Create<TKey>(Expression<Func<T, TKey>> expression) where TKey : notnull
     {
         var compiled = expression.Compile();
 
         string KeyFactory(T instance)
         {
-            var rawValue = compiled(instance);
-
-            return rawValue is not null &&
-                    rawValue.ToString()?.Trim() is string strValue &&
+            return compiled(instance) is TKey rawValue &&
+                rawValue.ToString()?.Trim() is string strValue &&
                     !string.IsNullOrWhiteSpace(strValue)
                     ? strValue
                     : throw new InvalidOperationException($"Value for {expression.GetMemberName()} cannot be null, empty, or whitespace when used as a section key.");
@@ -108,6 +106,6 @@ internal sealed class MappingValueElement<T> : ITraversableMappingElement<T> whe
     {
         var path = currentPath.AddSegment(_name);
 
-        yield return new (path.Path, _valueFactory(instance));
+        yield return new(path.Path, _valueFactory(instance));
     }
 }
