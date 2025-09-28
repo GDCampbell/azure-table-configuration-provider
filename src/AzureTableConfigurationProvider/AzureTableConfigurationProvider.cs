@@ -15,24 +15,35 @@ internal sealed class AzureTableConfigurationProvider<TEntity>(
 
     public override void Load()
     {
-        LoadEntitiesAsync().GetAwaiter().GetResult();
+        var data = LoadEntitiesAsync().GetAwaiter().GetResult();
+
+        Data.Clear();
+
+        foreach (var (key, value) in data)
+        {
+            Data[key] = value;
+        }
     }
 
-    private async Task LoadEntitiesAsync()
+    private async Task<IDictionary<string, string?>> LoadEntitiesAsync()
     {
         var results = query?.Filter switch
         {
-            StringFilter stringFilter => tableClient.QueryAsync<TEntity>(stringFilter.Filter, query.MaxPerPage, query.Select),
             PredicateFilter<TEntity> predicateFilter => tableClient.QueryAsync(predicateFilter.Filter, query.MaxPerPage, query.Select),
+            StringFilter stringFilter => tableClient.QueryAsync<TEntity>(stringFilter.Filter, query.MaxPerPage, query.Select),
             _ => tableClient.QueryAsync<TEntity>(maxPerPage: query?.MaxPerPage, select: query?.Select)
         };
+
+        var data = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
 
         await foreach (var entity in results.ConfigureAwait(false))
         {
             foreach (var (key, value) in mappingRoot.ExtractFrom(entity))
             {
-                Data[key] = value;
+                data[key] = value;
             }
         }
+
+        return data;
     }
 }
