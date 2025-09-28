@@ -54,7 +54,7 @@ internal sealed class MappingDynamicKeySection<T>: MappingKeySection<T> where T 
     private MappingDynamicKeySection(Func<T, string> keyFactory)
         : base(keyFactory) { }
 
-    public static MappingDynamicKeySection<T> Create<TKey>(Expression<Func<T, TKey>> expression) where TKey : notnull
+    public static MappingDynamicKeySection<T> Create<TKey>(Expression<Func<T, TKey>> expression)
     {
         var compiled = expression.Compile();
 
@@ -81,7 +81,7 @@ internal sealed class MappingValueElement<T> : ITraversableMappingElement<T> whe
     private MappingValueElement(string name, Func<T, string?> valueFactory)
         => (_name, _valueFactory) = (name, valueFactory);
 
-    public static MappingValueElement<T> Create<TValue>(Expression<Func<T, TValue?>> expression, string? nameOverride = null)
+    public static MappingValueElement<T> Create<TValue>(Expression<Func<T, TValue>> expression, string? nameOverride = null)
     {
         var name = string.IsNullOrWhiteSpace(nameOverride)
             ? expression.GetMemberName()

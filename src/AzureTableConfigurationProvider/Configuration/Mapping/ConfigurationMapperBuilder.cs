@@ -27,7 +27,7 @@ public partial interface IConfigurationMapper<TEntity> where TEntity : class, IT
     /// configuration for the section. Cannot be null.</param>
     /// <returns>The current configuration mapper instance, allowing for method chaining.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="keyExpression"/> or <paramref name="configure"/> is null.</exception>
-    IConfigurationMapper<TEntity> AddSection<TKey>(Expression<Func<TEntity, TKey>> keyExpression, Action<IConfigurationMapper<TEntity>> configure) where TKey : notnull;
+    IConfigurationMapper<TEntity> AddSection<TKey>(Expression<Func<TEntity, TKey>> keyExpression, Action<IConfigurationMapper<TEntity>> configure);
     /// <summary>
     /// Configures the mapper to use the specified value expression for mapping an entity property, optionally
     /// overriding the default property name.
@@ -61,7 +61,7 @@ public sealed class ConfigurationMapperBuilder<TEntity> : IConfigurationMapper<T
         return AddSection(new MappingStaticKeySection<TEntity>(name), configure);
     }
 
-    public IConfigurationMapper<TEntity> AddSection<TKey>(Expression<Func<TEntity, TKey>> keyExpression, Action<IConfigurationMapper<TEntity>> configure) where TKey : notnull
+    public IConfigurationMapper<TEntity> AddSection<TKey>(Expression<Func<TEntity, TKey>> keyExpression, Action<IConfigurationMapper<TEntity>> configure)
     {
         ArgumentNullException.ThrowIfNull(keyExpression);
         ArgumentNullException.ThrowIfNull(configure);
