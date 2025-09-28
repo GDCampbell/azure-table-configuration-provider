@@ -70,13 +70,20 @@ public sealed class ProviderConfigurationBuilder<TEntity> where TEntity : class,
 
         StringBuilder sb = new();
 
-        if (_tableClientFactory is null)
+        var tableFactoryMissing = _tableClientFactory is null;
+        var mappingMissing = _mappingBuilder is null;
+
+        if (tableFactoryMissing)
         {
             sb.Append(_configureTableFactoryMessage);
+        }
+
+        if (tableFactoryMissing && mappingMissing)
+        {
             sb.Append(' ');
         }
 
-        if (_mappingBuilder is null)
+        if (mappingMissing)
         {
             sb.Append(_configureMappingMessage);
         }
