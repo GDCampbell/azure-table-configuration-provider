@@ -47,7 +47,9 @@ public static class ConfigurationBuilderExtensions
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentNullException.ThrowIfNull(configure);
 
-        return builder.Add(new AzureTableConfigurationSource<TEntity>(builder.Build(), configure));
+        var configurationSnapshot = builder.Build();
+
+        return builder.Add(new AzureTableConfigurationSource<TEntity>(configurationSnapshot, configure));
     }
 
     /// <summary>
