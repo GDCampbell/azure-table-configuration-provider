@@ -26,15 +26,14 @@ public partial interface IConfigurationMapper<TEntity> where TEntity : class, IT
     /// is useful for grouping related configuration settings for different parts of an entity.
     /// <para>Note: Mapped configuration keys may include ':' to represent hierarchy; this is intentional and supported by the configuration system.</para>
     /// </remarks>
-    /// <typeparam name="TKey">The type of the key used to identify the configuration section. Must be a non-nullable type.</typeparam>
     /// <param name="keyExpression">An expression that specifies the key property of the entity. 
-    /// The property value will be extracted from each entity instance, converted to a string, 
+    /// The property value will be extracted from each entity instance  
     /// and used as the configuration section key. Cannot be null.</param>
     /// <param name="configure">An action that configures the newly added section. The provided mapper is used to define additional
     /// configuration for the section. Cannot be null.</param>
     /// <returns>The current configuration mapper instance, allowing for method chaining.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="keyExpression"/> or <paramref name="configure"/> is null.</exception>
-    IConfigurationMapper<TEntity> AddSection<TKey>(Expression<Func<TEntity, TKey>> keyExpression, Action<IConfigurationMapper<TEntity>> configure) where TKey : notnull;
+    IConfigurationMapper<TEntity> AddSection(Expression<Func<TEntity, string>> keyExpression, Action<IConfigurationMapper<TEntity>> configure);
     /// <summary>
     /// Configures the mapper to use the specified value expression for mapping an entity property, optionally
     /// overriding the default property name.
@@ -78,7 +77,7 @@ public sealed class ConfigurationMapperBuilder<TEntity> : IConfigurationMapper<T
         return AddSection(new MappingStaticKeySection<TEntity>(key), configure, key);
     }
 
-    public IConfigurationMapper<TEntity> AddSection<TKey>(Expression<Func<TEntity, TKey>> keyExpression, Action<IConfigurationMapper<TEntity>> configure) where TKey : notnull
+    public IConfigurationMapper<TEntity> AddSection(Expression<Func<TEntity, string>> keyExpression, Action<IConfigurationMapper<TEntity>> configure)
     {
         ArgumentNullException.ThrowIfNull(keyExpression);
         ArgumentNullException.ThrowIfNull(configure);

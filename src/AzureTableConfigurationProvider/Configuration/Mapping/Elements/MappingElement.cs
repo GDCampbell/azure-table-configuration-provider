@@ -1,4 +1,5 @@
 ﻿using AzureTable.Provider.Extensions;
+using System.Globalization;
 using System.Linq.Expressions;
 
 namespace AzureTable.Provider.Configuration.Mapping.Elements;
@@ -58,17 +59,17 @@ internal sealed class MappingDynamicKeySection<T> : MappingKeySection<T> where T
     private MappingDynamicKeySection(Func<T, string> keyFactory)
         : base(keyFactory) { }
 
-    public static MappingDynamicKeySection<T> Create<TKey>(Expression<Func<T, TKey>> expression) where TKey : notnull
+    public static MappingDynamicKeySection<T> Create(Expression<Func<T, string>> expression)
     {
         var compiled = expression.Compile();
 
         string KeyFactory(T instance)
         {
-            return compiled(instance) is TKey rawValue &&
-                rawValue.ToString()?.Trim() is string strValue &&
-                    !string.IsNullOrWhiteSpace(strValue)
-                    ? strValue
-                    : throw new InvalidOperationException($"Value for {expression.GetMemberName()} cannot be null, empty, or whitespace when used as a section key.");
+            var key = compiled(instance)?.Trim();
+
+            return !string.IsNullOrWhiteSpace(key)
+                ? key
+                : throw new InvalidOperationException($"Value for {expression.GetMemberName()} cannot be null, empty, or whitespace when used as a section key.");
         }
 
         return new(KeyFactory);
