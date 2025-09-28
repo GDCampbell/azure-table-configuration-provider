@@ -34,8 +34,7 @@ public static class ConfigurationBuilderExtensions
     /// </remarks>
     /// <typeparam name="TEntity">The type of the table entity used to map configuration data. Must implement the ITableEntity interface.</typeparam>
     /// <param name="builder">The configuration builder to which the Azure Table Storage configuration source will be added.</param>
-    /// <param name="configure">A delegate to configure the Azure Table Storage provider options for the specified entity type. Will throw 
-    /// <see cref="InvalidOperationException"/> if no tables are added.</param>
+    /// <param name="configure">A delegate to configure the Azure Table Storage provider options for the specified entity type.</param>
     /// <returns>The configuration builder with the Azure Table Storage configuration source added.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="builder"/> or <paramref name="configure"/> are null.</exception>
     /// <exception cref="InvalidOperationException">Thrown if the configuration source cannot be added due to misconfiguration.</exception>
@@ -81,7 +80,8 @@ public static class ConfigurationBuilderExtensions
     /// </code>
     /// </remarks>
     /// <param name="builder">The configuration builder to which the Azure Table Storage configuration sources will be added.</param>
-    /// <param name="configure">A delegate to configure multiple table mappings using the provided builder.</param>
+    /// <param name="configure">A delegate to configure multiple table mappings using the provided builder. Will throw 
+    /// <see cref="InvalidOperationException"/> if no tables are added.</param>
     /// <returns>The configuration builder with all the Azure Table Storage configuration sources added.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="builder"/> or <paramref name="configure"/> are null.</exception>
     /// <exception cref="InvalidOperationException">Thrown if the configuration source cannot be added due to misconfiguration.</exception>
