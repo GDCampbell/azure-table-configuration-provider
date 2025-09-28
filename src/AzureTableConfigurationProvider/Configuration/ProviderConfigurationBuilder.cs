@@ -32,7 +32,7 @@ public sealed class ProviderConfigurationBuilder<TEntity> where TEntity : class,
     /// <param name="mappingBuilder">An action that receives a configuration mapper builder and the current configuration, allowing custom mapping
     /// logic to be defined. Cannot be null.</param>
     /// <returns>The current <see cref="ProviderConfigurationBuilder{TEntity}"/> instance for method chaining.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if the provided mappingBuilder is null.</exception>"
+    /// <exception cref="ArgumentNullException">Thrown if the provided mappingBuilder is null.</exception>
     public ProviderConfigurationBuilder<TEntity> ConfigureMapping(Action<ConfigurationMapperBuilder<TEntity>, IConfiguration> mappingBuilder)
     {
         ArgumentNullException.ThrowIfNull(mappingBuilder);
@@ -47,7 +47,7 @@ public sealed class ProviderConfigurationBuilder<TEntity> where TEntity : class,
     /// <param name="queryConfiguration">An action that receives a <see cref="TableQueryConfiguration"/> object to customize query behavior. Cannot be
     /// null.</param>
     /// <returns>The current <see cref="ProviderConfigurationBuilder{TEntity}"/> instance for method chaining.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if the provided queryConfiguration is null.</exception>"
+    /// <exception cref="ArgumentNullException">Thrown if the provided queryConfiguration is null.</exception>
     public ProviderConfigurationBuilder<TEntity> ConfigureQuery(Action<TableQueryConfiguration> queryConfiguration)
     {
         // The query configuration is optional but if they're calling this method, then it shouldn't be null.
