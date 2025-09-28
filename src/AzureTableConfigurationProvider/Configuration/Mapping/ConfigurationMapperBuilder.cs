@@ -97,9 +97,11 @@ public sealed class ConfigurationMapperBuilder<TEntity> : IConfigurationMapper<T
     }
 
     MappingRootSection<TEntity> IConfigurationMapperBuilder<TEntity>.Build()
-        => _section is MappingRootSection<TEntity> rootSection
-        ? rootSection
-        : throw new InvalidOperationException($"{nameof(Build)} can only be called on the root section.");
+        => _section switch
+        {
+            MappingRootSection<TEntity> rootSection => rootSection.HasElements ? rootSection : throw new InvalidOperationException("At least one section or value must be configured for the mapper."),
+            _ => throw new InvalidOperationException($"{nameof(Build)} can only be called on the root section.")
+        };
 
     internal MappingRootSection<TEntity> Build() => ((IConfigurationMapperBuilder<TEntity>)this).Build();
 
