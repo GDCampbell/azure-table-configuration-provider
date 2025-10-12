@@ -19,6 +19,28 @@ internal abstract class MappingSection<T> : IMappingSection<T> where T : class
 {
     protected readonly List<ITraversableMappingElement<T>> _elements = [];
 
+    protected readonly Func<T, string> _keyFactory;
+
+    protected MappingSection(string staticKey = "")
+    {
+        staticKey = staticKey?.Trim() ?? string.Empty;
+
+        _keyFactory = _ => staticKey;
+    }
+
+    protected MappingSection(Expression<Func<T, string>> keyExpression)
+    {
+        var compiled = keyExpression.Compile();
+        string KeyFactory(T instance)
+        {
+            var key = compiled(instance)?.Trim();
+            return !string.IsNullOrWhiteSpace(key)
+                ? key
+                : throw new InvalidOperationException($"Value for {keyExpression.GetMemberName()} cannot be null, empty, or whitespace when used as a section key.");
+        }
+        _keyFactory = KeyFactory;
+    }
+
     public bool HasElements => _elements.Count > 0;
 
     public void Add(ITraversableMappingElement<T> element)
@@ -35,8 +57,18 @@ internal sealed class MappingRootSection<T> : MappingSection<T> where T : class
         : throw new InvalidOperationException("Root level must have at least one child element.");
 }
 
-internal abstract class MappingKeySection<T>(Func<T, string> keyFactory) : MappingSection<T>, ITraversableMappingElement<T> where T : class
+internal sealed class MappingKeySection<T> : MappingSection<T>, ITraversableMappingElement<T> where T : class
 {
+    public MappingKeySection(string staticKey)
+        : base(staticKey)
+    {
+    }
+
+    public MappingKeySection(Expression<Func<T, string>> keyExpression)
+        : base(keyExpression)
+    {
+    }
+
     public IEnumerable<KeyValuePair<string, string?>> ExtractFrom(T instance, SectionPath currentPath)
     {
         if (!HasElements)
@@ -44,35 +76,11 @@ internal abstract class MappingKeySection<T>(Func<T, string> keyFactory) : Mappi
             throw new InvalidOperationException("Key section must have at least one child element.");
         }
 
-        var key = keyFactory(instance).Trim();
+        var key = _keyFactory(instance).Trim();
 
         var newPath = currentPath.AddSegment(key);
 
         return _elements.SelectMany(e => e.ExtractFrom(instance, newPath));
-    }
-}
-
-internal sealed class MappingStaticKeySection<T>(string key) : MappingKeySection<T>(_ => key) where T : class;
-
-internal sealed class MappingDynamicKeySection<T> : MappingKeySection<T> where T : class
-{
-    private MappingDynamicKeySection(Func<T, string> keyFactory)
-        : base(keyFactory) { }
-
-    public static MappingDynamicKeySection<T> Create(Expression<Func<T, string>> expression)
-    {
-        var compiled = expression.Compile();
-
-        string KeyFactory(T instance)
-        {
-            var key = compiled(instance)?.Trim();
-
-            return !string.IsNullOrWhiteSpace(key)
-                ? key
-                : throw new InvalidOperationException($"Value for {expression.GetMemberName()} cannot be null, empty, or whitespace when used as a section key.");
-        }
-
-        return new(KeyFactory);
     }
 }
 
@@ -84,31 +92,13 @@ internal sealed class MappingValueElement<T> : ITraversableMappingElement<T> whe
     private MappingValueElement(string name, Func<T, string?> valueFactory)
         => (_name, _valueFactory) = (name, valueFactory);
 
-    public static MappingValueElement<T> Create<TValue>(Expression<Func<T, TValue>> expression, string? nameOverride = null)
+    public static MappingValueElement<T> Create<TValue>(string name, Func<T, TValue> valueFactory)
     {
-        var name = (string.IsNullOrWhiteSpace(nameOverride)
-            ? expression.GetMemberName()
-            : nameOverride)
-            .Trim();
-
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Name cannot be null, empty, or whitespace.", nameof(nameOverride));
-        }
-
-        var compiled = expression.Compile();
+        name = name?.Trim() ?? string.Empty;
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
         string? ValueFactory(T instance)
-        {
-            var value = compiled(instance);
-
-            return value switch
-            {
-                IFormattable fmt => fmt.ToString(null, CultureInfo.InvariantCulture),
-                not null => value.ToString(),
-                _ => null
-            };
-        }
+            => valueFactory(instance).ToInvariantString();
 
         return new(name, ValueFactory);
     }
@@ -118,5 +108,47 @@ internal sealed class MappingValueElement<T> : ITraversableMappingElement<T> whe
         var path = currentPath.AddSegment(_name);
 
         yield return new(path.Path, _valueFactory(instance));
+    }
+}
+
+internal sealed class PrimitiveArrayElement<T> : MappingSection<T>, ITraversableMappingElement<T> where T : class
+{
+    private readonly List<Func<T, string?>> _itemFactories = [];
+
+    public PrimitiveArrayElement(string staticKey)
+        : base(staticKey)
+    {
+    }
+
+    public PrimitiveArrayElement(Expression<Func<T, string>> keyExpression)
+        : base(keyExpression)
+    {
+    }
+
+    public IEnumerable<KeyValuePair<string, string?>> ExtractFrom(T instance, SectionPath currentPath)
+    {
+        var key = _keyFactory(instance).Trim();
+
+        if (!string.IsNullOrWhiteSpace(key))
+        {
+            throw new InvalidOperationException("Array key cannot be null, empty, or whitespace.");
+        }
+
+        var basePath = currentPath.AddSegment(key);
+
+        for (var i = 0; i < _itemFactories.Count; i++)
+        {
+            var itemFactory = _itemFactories[i];
+            var itemPath = basePath.AddSegment(i.ToString(CultureInfo.InvariantCulture));
+
+            var itemValue = itemFactory(instance);
+
+            yield return new(itemPath.Path, itemValue);
+        }
+    }
+
+    public void AddItem<TValue>(Func<T, TValue> valueFactory)
+    {
+        _itemFactories.Add(e => valueFactory(e).ToInvariantString());
     }
 }

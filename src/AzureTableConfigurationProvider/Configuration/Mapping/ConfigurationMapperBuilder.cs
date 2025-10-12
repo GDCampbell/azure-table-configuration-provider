@@ -1,11 +1,12 @@
-﻿using Azure.Data.Tables;
+﻿using Azure;
+using Azure.Data.Tables;
 using AzureTable.Provider.Configuration.Mapping.Elements;
 using AzureTable.Provider.Extensions;
 using System.Linq.Expressions;
 
 namespace AzureTable.Provider.Configuration.Mapping;
 
-public partial interface IConfigurationMapper<TEntity> where TEntity : class, ITableEntity
+public interface IConfigurationMapper<TEntity> where TEntity : class, ITableEntity
 {
     /// <summary>
     /// Adds a new configuration section with the specified key and applies the provided configuration action to it.
@@ -53,13 +54,111 @@ public partial interface IConfigurationMapper<TEntity> where TEntity : class, IT
     /// used.</param>
     /// <returns>An updated configuration mapper with the specified value mapping applied.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="valueExpression"/> is null.</exception>
-    IConfigurationMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue>> valueExpression, string? nameOverride = null);
+    //IConfigurationMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue>> valueExpression, string? nameOverride = null);
+
+    IConfigurationMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue>> valueExpression, string name) where TValue : struct, IFormattable;
+    IConfigurationMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue?>> valueExpression, string name) where TValue : struct, IFormattable;
+    IConfigurationMapper<TEntity> WithValue(Expression<Func<TEntity, string?>> valueExpression, string name);
+
+    IConfigurationMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue>> valueExpression) where TValue : struct, IFormattable;
+    IConfigurationMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue?>> valueExpression) where TValue : struct, IFormattable;
+    IConfigurationMapper<TEntity> WithValue(Expression<Func<TEntity, string?>> valueExpression);
+}
+
+//public interface IConfigurationValueWithOverrideMapper<TEntity> where TEntity : class, ITableEntity
+//{
+//    IConfigurationValueWithOverrideMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue>> valueExpression, string name) where TValue : struct, IFormattable;
+//    IConfigurationValueWithOverrideMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue?>> valueExpression, string name) where TValue : struct, IFormattable;
+//    IConfigurationValueWithOverrideMapper<TEntity> WithValue(Expression<Func<TEntity, string?>> valueExpression, string name);
+//}
+
+//public interface IConfigurationValueMapper<TEntity> where TEntity : class, ITableEntity
+//{
+//    IConfigurationValueMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue>> valueExpression) where TValue : struct, IFormattable;
+//    IConfigurationValueMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue?>> valueExpression) where TValue : struct, IFormattable;
+//    IConfigurationValueMapper<TEntity> WithValue(Expression<Func<TEntity, string?>> valueExpression);
+//}
+
+public interface IPrimitiveArrayMapperBuilder<TEntity, TValue> 
+    where TEntity : class, ITableEntity 
+    where TValue : struct, IFormattable
+{
+    IPrimitiveArrayMapperBuilder<TEntity, TValue> AddItem(Func<TEntity, TValue> valueFactory);
+    IPrimitiveArrayMapperBuilder<TEntity, TValue> AddItem(Func<TEntity, TValue?> valueFactory);
+}
+
+public interface IStringArrayMapperBuilder<TEntity> where TEntity : class, ITableEntity
+{
+    IStringArrayMapperBuilder<TEntity> AddItem(Func<TEntity, string?> valueFactory);
+}
+
+
+internal abstract class BasePrimitiveArrayMapperBuilder<TEntity> where TEntity : class, ITableEntity
+{
+    private readonly PrimitiveArrayElement<TEntity> _section;
+
+    protected BasePrimitiveArrayMapperBuilder(string key) => _section = new(key);
+    protected BasePrimitiveArrayMapperBuilder(Expression<Func<TEntity, string>> keyExpression) => _section = new(keyExpression);
+
+    protected void AddItemInternal<TValue>(Func<TEntity, TValue> valueFactory)
+    {
+        ArgumentNullException.ThrowIfNull(valueFactory);
+        _section.AddItem(valueFactory);
+    }
+
+    public PrimitiveArrayElement<TEntity> Build() => _section;
+}
+
+internal sealed class StringArrayMapperBuilder<TEntity> : BasePrimitiveArrayMapperBuilder<TEntity>, IStringArrayMapperBuilder<TEntity>
+    where TEntity : class, ITableEntity
+{
+    internal StringArrayMapperBuilder(string key) : base(key) { }
+    internal StringArrayMapperBuilder(Expression<Func<TEntity, string>> keyExpression) : base(keyExpression) { }
+    public IStringArrayMapperBuilder<TEntity> AddItem(Func<TEntity, string?> valueFactory)
+    {
+        AddItemInternal(valueFactory);
+        return this;
+    }
+}
+
+internal sealed class PrimitiveArrayMapperBuilder<TEntity, TValue> : BasePrimitiveArrayMapperBuilder<TEntity>, IPrimitiveArrayMapperBuilder<TEntity, TValue>
+    where TEntity : class, ITableEntity
+    where TValue : struct, IFormattable
+{
+    
+    internal PrimitiveArrayMapperBuilder(string key) : base(key) { }
+    internal PrimitiveArrayMapperBuilder(Expression<Func<TEntity, string>> keyExpression) : base(keyExpression) { }
+
+    public IPrimitiveArrayMapperBuilder<TEntity, TValue> AddItem(Func<TEntity, TValue> valueFactory)
+    {
+        AddItemInternal(valueFactory);
+        
+        return this;
+    }
+
+    public IPrimitiveArrayMapperBuilder<TEntity, TValue> AddItem(Func<TEntity, TValue?> valueFactory)
+    {
+        AddItemInternal(valueFactory);
+        return this;
+    }
 }
 
 internal interface IConfigurationMapperBuilder<TEntity> where TEntity : class, ITableEntity
 {
     MappingRootSection<TEntity> Build();
 }
+
+internal class Test : ITableEntity
+{
+    public string PartitionKey { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public string RowKey { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public DateTimeOffset? Timestamp { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public ETag ETag { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+    public int IntProperty { get; set; }
+    public int? NullableInt { get; set; }
+}
+
 public sealed class ConfigurationMapperBuilder<TEntity> : IConfigurationMapper<TEntity>, IConfigurationMapperBuilder<TEntity> where TEntity : class, ITableEntity
 {
     private readonly MappingSection<TEntity> _section;
@@ -73,26 +172,46 @@ public sealed class ConfigurationMapperBuilder<TEntity> : IConfigurationMapper<T
         key = key?.Trim() ?? string.Empty;
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         ArgumentNullException.ThrowIfNull(configure);
-
-        return AddSection(new MappingStaticKeySection<TEntity>(key), configure, key);
+        
+        return AddSection(new MappingKeySection<TEntity>(key), configure, key);
     }
 
     public IConfigurationMapper<TEntity> AddSection(Expression<Func<TEntity, string>> keyExpression, Action<IConfigurationMapper<TEntity>> configure)
     {
         ArgumentNullException.ThrowIfNull(keyExpression);
         ArgumentNullException.ThrowIfNull(configure);
-        
-        return AddSection(MappingDynamicKeySection<TEntity>.Create(keyExpression), configure, keyExpression.GetMemberName());
+
+        return AddSection(new MappingKeySection<TEntity>(keyExpression), configure, keyExpression.GetMemberName());
     }
 
-    public IConfigurationMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue>> valueExpression, string? nameOverride = null)
+    public IConfigurationMapper<TEntity> AddPrimitiveArraySection<TValue>(string key, Action<IPrimitiveArrayMapperBuilder<TEntity, TValue>> configure) where TValue : struct, IFormattable
     {
-        ArgumentNullException.ThrowIfNull(valueExpression);
+        key = key?.Trim() ?? string.Empty;
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+        ArgumentNullException.ThrowIfNull(configure);
 
-        var valueElement = MappingValueElement<TEntity>.Create(valueExpression, nameOverride);
+        var arrayBuilder = new PrimitiveArrayMapperBuilder<TEntity, TValue>(key);
 
-        _section.Add(valueElement);
+        return AddPrimitiveArray(arrayBuilder, configure);
+    }
 
+    public IConfigurationMapper<TEntity> AddPrimitiveArraySection<TValue>(Expression<Func<TEntity, string>> keyExpression, Action<IPrimitiveArrayMapperBuilder<TEntity, TValue>> configure) where TValue : struct, IFormattable
+    {
+        ArgumentNullException.ThrowIfNull(keyExpression);
+        ArgumentNullException.ThrowIfNull(configure);
+
+        var arrayBuilder = new PrimitiveArrayMapperBuilder<TEntity, TValue>(keyExpression);
+
+        return AddPrimitiveArray(arrayBuilder, configure);
+    }
+
+    private IConfigurationMapper<TEntity> AddPrimitiveArray<TValue>(PrimitiveArrayMapperBuilder<TEntity, TValue> arrayBuilder, Action<IPrimitiveArrayMapperBuilder<TEntity, TValue>> configure) where TValue : struct, IFormattable
+    {
+        configure(arrayBuilder);
+
+        var arraySection = arrayBuilder.Build();
+
+        _section.Add(arraySection);
         return this;
     }
 
@@ -105,6 +224,39 @@ public sealed class ConfigurationMapperBuilder<TEntity> : IConfigurationMapper<T
 
     internal MappingRootSection<TEntity> Build() => ((IConfigurationMapperBuilder<TEntity>)this).Build();
 
+    public IConfigurationMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue>> valueExpression, string name) where TValue : struct, IFormattable
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        return WithValueInternal(valueExpression, name);
+    }
+
+    public IConfigurationMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue?>> valueExpression, string name) where TValue : struct, IFormattable
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        return WithValueInternal(valueExpression, name);
+    }
+
+    public IConfigurationMapper<TEntity> WithValue(Expression<Func<TEntity, string?>> valueExpression, string name)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        return WithValueInternal(valueExpression, name);
+    }
+
+    public IConfigurationMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue>> valueExpression) where TValue : struct, IFormattable
+    {
+        return WithValueInternal(valueExpression, null);
+    }
+
+    public IConfigurationMapper<TEntity> WithValue<TValue>(Expression<Func<TEntity, TValue?>> valueExpression) where TValue : struct, IFormattable
+    {
+        return WithValueInternal(valueExpression, null);
+    }
+
+    public IConfigurationMapper<TEntity> WithValue(Expression<Func<TEntity, string?>> valueExpression)
+    {
+        return WithValueInternal(valueExpression, null);
+    }
+
     private ConfigurationMapperBuilder<TEntity> AddSection(MappingKeySection<TEntity> section, Action<IConfigurationMapper<TEntity>> configure, string sectionName)
     {
         var builder = new ConfigurationMapperBuilder<TEntity>(section);
@@ -116,6 +268,16 @@ public sealed class ConfigurationMapperBuilder<TEntity> : IConfigurationMapper<T
         }
 
         _section.Add(section);
+        return this;
+    }
+
+    private ConfigurationMapperBuilder<TEntity> WithValueInternal<TValue>(Expression<Func<TEntity, TValue>> valueExpression, string? name)
+    {
+        ArgumentNullException.ThrowIfNull(valueExpression);
+        var valueElement = MappingValueElement<TEntity>.Create(name ?? valueExpression.GetMemberName(), valueExpression.Compile());
+
+        _section.Add(valueElement);
+
         return this;
     }
 }
