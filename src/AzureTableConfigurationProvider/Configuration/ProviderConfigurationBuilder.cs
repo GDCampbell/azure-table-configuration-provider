@@ -1,15 +1,15 @@
-﻿using Azure.Data.Tables;
+﻿using System.Text;
+using Azure.Data.Tables;
 using AzureTable.Provider.Configuration.Mapping;
 using AzureTable.Provider.Query;
 using Microsoft.Extensions.Configuration;
-using System.Text;
 
 namespace AzureTable.Provider.Configuration;
 
 public sealed class ProviderConfigurationBuilder<TEntity> where TEntity : class, ITableEntity
 {
     private Func<IConfiguration, TableClient>? _tableClientFactory;
-    private Action<ITableConfigurationMapper<TEntity>, IConfiguration>? _mappingBuilder;
+    private Action<IConfigurationMapper<TEntity>, IConfiguration>? _mappingBuilder;
     private Action<TableQueryConfiguration>? _queryConfiguration;
 
     /// <summary>
@@ -33,7 +33,7 @@ public sealed class ProviderConfigurationBuilder<TEntity> where TEntity : class,
     /// logic to be defined. Cannot be null.</param>
     /// <returns>The current <see cref="ProviderConfigurationBuilder{TEntity}"/> instance for method chaining.</returns>
     /// <exception cref="ArgumentNullException">Thrown if the provided mappingBuilder is null.</exception>
-    public ProviderConfigurationBuilder<TEntity> ConfigureMapping(Action<ITableConfigurationMapper<TEntity>, IConfiguration> mappingBuilder)
+    public ProviderConfigurationBuilder<TEntity> ConfigureMapping(Action<IConfigurationMapper<TEntity>, IConfiguration> mappingBuilder)
     {
         ArgumentNullException.ThrowIfNull(mappingBuilder);
 
@@ -98,11 +98,11 @@ public sealed class ProviderConfigurationBuilder<TEntity> where TEntity : class,
 internal sealed class ProviderConfiguration<TEntity> where TEntity : class, ITableEntity
 {
     public required Func<IConfiguration, TableClient> TableClientFactory { get; init; }
-    public required Action<ITableConfigurationMapper<TEntity>, IConfiguration> MappingBuilder { get; init; }
+    public required Action<IConfigurationMapper<TEntity>, IConfiguration> MappingBuilder { get; init; }
     public Action<TableQueryConfiguration>? QueryConfiguration { get; init; }
 
     public void Deconstruct(out Func<IConfiguration, TableClient> tableClientFactory,
-        out Action<ITableConfigurationMapper<TEntity>, IConfiguration> mappingBuilder,
+        out Action<IConfigurationMapper<TEntity>, IConfiguration> mappingBuilder,
         out Action<TableQueryConfiguration>? queryConfiguration)
     {
         tableClientFactory = TableClientFactory;

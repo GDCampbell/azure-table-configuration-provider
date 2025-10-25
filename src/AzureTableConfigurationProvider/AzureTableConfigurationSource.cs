@@ -9,8 +9,8 @@ namespace AzureTable.Provider;
 internal sealed class AzureTableConfigurationSource<TEntity>(
     IConfiguration configurationSnapshot,
     Action<ProviderConfigurationBuilder<TEntity>> configure
-    ) 
-    : IConfigurationSource 
+    )
+    : IConfigurationSource
     where TEntity : class, ITableEntity
 {
     public IConfigurationProvider Build(IConfigurationBuilder builder)
@@ -21,8 +21,8 @@ internal sealed class AzureTableConfigurationSource<TEntity>(
         var (tableFactory, mappingBuilderConfiguration, queryConfiguration) = providerBuilder.Build();
 
         var tableClient = tableFactory(configurationSnapshot);
-        
-        var mappingBuilder = new TableConfigurationMapperBuilder<TEntity>();
+
+        var mappingBuilder = new ConfigurationMapperBuilder<TEntity>();
 
         mappingBuilderConfiguration(mappingBuilder, configurationSnapshot);
 
