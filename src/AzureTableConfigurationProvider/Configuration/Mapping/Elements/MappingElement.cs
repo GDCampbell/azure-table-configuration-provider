@@ -1,6 +1,6 @@
-﻿using AzureTable.Provider.Extensions;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Linq.Expressions;
+using AzureTable.Provider.Extensions;
 
 namespace AzureTable.Provider.Configuration.Mapping.Elements;
 
@@ -11,12 +11,14 @@ internal interface ITraversableMappingElement<T>
 
 internal interface IMappingSection<T>
 {
+    string Name { get; }
     void Add(ITraversableMappingElement<T> element);
     bool HasElements { get; }
 }
 
 internal abstract class MappingSection<T> : IMappingSection<T> where T : class
 {
+    public string Name { get; }
     protected readonly List<ITraversableMappingElement<T>> _elements = [];
 
     protected readonly Func<T, string> _keyFactory;
@@ -26,17 +28,20 @@ internal abstract class MappingSection<T> : IMappingSection<T> where T : class
         staticKey = staticKey?.Trim() ?? string.Empty;
 
         _keyFactory = _ => staticKey;
+        Name = $"Fixed: {staticKey}";
     }
 
     protected MappingSection(Expression<Func<T, string>> keyExpression)
     {
+        Name = $"MemberName: {keyExpression.GetMemberName()}";
+
         var compiled = keyExpression.Compile();
         string KeyFactory(T instance)
         {
             var key = compiled(instance)?.Trim();
             return !string.IsNullOrWhiteSpace(key)
                 ? key
-                : throw new InvalidOperationException($"Value for {keyExpression.GetMemberName()} cannot be null, empty, or whitespace when used as a section key.");
+                : throw new InvalidOperationException($"Value for {Name} cannot be null, empty, or whitespace when used as a section key.");
         }
         _keyFactory = KeyFactory;
     }
@@ -73,7 +78,7 @@ internal sealed class MappingKeySection<T> : MappingSection<T>, ITraversableMapp
     {
         if (!HasElements)
         {
-            throw new InvalidOperationException("Key section must have at least one child element.");
+            throw new InvalidOperationException("Section must have at least one child element.");
         }
 
         var key = _keyFactory(instance).Trim();
@@ -150,5 +155,10 @@ internal sealed class PrimitiveArrayElement<T> : MappingSection<T>, ITraversable
     public void AddItem<TValue>(Func<T, TValue> valueFactory)
     {
         _itemFactories.Add(e => valueFactory(e).ToInvariantString());
+    }
+
+    public void AddItem<TValue>(TValue value)
+    {
+        _itemFactories.Add(_ => value.ToInvariantString());
     }
 }

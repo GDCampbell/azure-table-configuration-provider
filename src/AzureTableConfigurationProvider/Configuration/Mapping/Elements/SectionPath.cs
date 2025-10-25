@@ -14,7 +14,10 @@ internal sealed class SectionPath
         segment = segment?.Trim() ?? string.Empty;
         ArgumentException.ThrowIfNullOrWhiteSpace(segment);
 
-        return new(string.IsNullOrWhiteSpace(Path) ? segment : $"{Path}:{segment}");
+        return new(string.IsNullOrWhiteSpace(Path)
+            ? segment
+            : $"{Path}:{segment}");
+        // TODO: Consider letting the delimiter be configurable in the future.
     }
 
 }

@@ -9,9 +9,9 @@ namespace AzureTable.Provider.Configuration;
 public sealed class ProviderConfigurationBuilder<TEntity> where TEntity : class, ITableEntity
 {
     private Func<IConfiguration, TableClient>? _tableClientFactory;
-    private Action<IConfigurationMapper<TEntity>, IConfiguration>? _mappingBuilder;
+    private Action<ConfigurationMapper<TEntity>, IConfiguration>? _mappingBuilder;
     private Action<TableQueryConfiguration>? _queryConfiguration;
-
+    private Func<IEnumerable<TEntity>, IOrderedEnumerable<TEntity>>? _orderBy;
     /// <summary>
     /// Configures the factory function used to create a TableClient instance for the provider.
     /// </summary>
@@ -33,7 +33,7 @@ public sealed class ProviderConfigurationBuilder<TEntity> where TEntity : class,
     /// logic to be defined. Cannot be null.</param>
     /// <returns>The current <see cref="ProviderConfigurationBuilder{TEntity}"/> instance for method chaining.</returns>
     /// <exception cref="ArgumentNullException">Thrown if the provided mappingBuilder is null.</exception>
-    public ProviderConfigurationBuilder<TEntity> ConfigureMapping(Action<IConfigurationMapper<TEntity>, IConfiguration> mappingBuilder)
+    public ProviderConfigurationBuilder<TEntity> ConfigureMapping(Action<ConfigurationMapper<TEntity>, IConfiguration> mappingBuilder)
     {
         ArgumentNullException.ThrowIfNull(mappingBuilder);
 
@@ -56,6 +56,13 @@ public sealed class ProviderConfigurationBuilder<TEntity> where TEntity : class,
         return this;
     }
 
+    public ProviderConfigurationBuilder<TEntity> SetOrderBy(Func<IEnumerable<TEntity>, IOrderedEnumerable<TEntity>> orderBy)
+    {
+        ArgumentNullException.ThrowIfNull(orderBy);
+        _orderBy = orderBy;
+        return this;
+    }
+
     internal ProviderConfiguration<TEntity> Build()
     {
         if (_tableClientFactory is not null && _mappingBuilder is not null)
@@ -64,7 +71,8 @@ public sealed class ProviderConfigurationBuilder<TEntity> where TEntity : class,
             {
                 MappingBuilder = _mappingBuilder,
                 TableClientFactory = _tableClientFactory,
-                QueryConfiguration = _queryConfiguration
+                QueryConfiguration = _queryConfiguration,
+                OrderBy = _orderBy
             };
         }
 
@@ -98,11 +106,13 @@ public sealed class ProviderConfigurationBuilder<TEntity> where TEntity : class,
 internal sealed class ProviderConfiguration<TEntity> where TEntity : class, ITableEntity
 {
     public required Func<IConfiguration, TableClient> TableClientFactory { get; init; }
-    public required Action<IConfigurationMapper<TEntity>, IConfiguration> MappingBuilder { get; init; }
+    public required Action<ConfigurationMapper<TEntity>, IConfiguration> MappingBuilder { get; init; }
     public Action<TableQueryConfiguration>? QueryConfiguration { get; init; }
 
+    public Func<IEnumerable<TEntity>, IOrderedEnumerable<TEntity>>? OrderBy { get; init; }
+
     public void Deconstruct(out Func<IConfiguration, TableClient> tableClientFactory,
-        out Action<IConfigurationMapper<TEntity>, IConfiguration> mappingBuilder,
+        out Action<ConfigurationMapper<TEntity>, IConfiguration> mappingBuilder,
         out Action<TableQueryConfiguration>? queryConfiguration)
     {
         tableClientFactory = TableClientFactory;

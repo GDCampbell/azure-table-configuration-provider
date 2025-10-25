@@ -22,7 +22,7 @@ internal sealed class AzureTableConfigurationSource<TEntity>(
 
         var tableClient = tableFactory(configurationSnapshot);
 
-        var mappingBuilder = new ConfigurationMapperBuilder<TEntity>();
+        var mappingBuilder = new ConfigurationMapper<TEntity>();
 
         mappingBuilderConfiguration(mappingBuilder, configurationSnapshot);
 
