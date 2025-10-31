@@ -26,7 +26,12 @@ internal sealed class AzureTableConfigurationSource<TEntity>(
 
         mappingBuilderConfiguration(mappingBuilder, configurationSnapshot);
 
-        var mappingRoot = mappingBuilder.Build();
+        var mappingRoot = mappingBuilder.Element;
+
+        if (!mappingRoot.HasElements)
+        {
+            throw new InvalidOperationException("At least one mapping element must be configured.");
+        }
 
         TableQueryConfiguration? query = null;
 

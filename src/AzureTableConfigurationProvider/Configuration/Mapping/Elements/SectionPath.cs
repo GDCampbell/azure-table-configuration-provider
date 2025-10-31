@@ -17,7 +17,8 @@ internal sealed class SectionPath
         return new(string.IsNullOrWhiteSpace(Path)
             ? segment
             : $"{Path}:{segment}");
-        // TODO: Consider letting the delimiter be configurable in the future.
     }
 
+    public static implicit operator string(SectionPath sectionPath) => sectionPath.Path;
+    public static SectionPath operator +(SectionPath left, string right) => left.AddSegment(right);
 }
