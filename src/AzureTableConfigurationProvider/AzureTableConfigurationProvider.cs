@@ -35,11 +35,11 @@ internal sealed class AzureTableConfigurationProvider<TEntity>(
         };
 
         var data = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-        var arrayPathToIndexx = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var arrayPathToIndex = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         await foreach (var entity in results.ConfigureAwait(false))
         {
-            MapEntity(entity, data, arrayPathToIndexx);
+            MapEntity(entity, data, arrayPathToIndex);
         }
 
         return data;
