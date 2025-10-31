@@ -9,6 +9,8 @@ public static class ConfigurationMapperArrayExtensions
         where TMapper : BaseConfigurationMapper<T>
         where TValue : struct, IFormattable
     {
+        ArgumentNullException.ThrowIfNull(configure);
+
         var arrayMapper = new SimpleArrayMapper<T, TValue>(name);
 
         configure(arrayMapper);
@@ -23,6 +25,8 @@ public static class ConfigurationMapperArrayExtensions
         where TMapper : BaseConfigurationMapper<T>
         where TValue : struct, IFormattable
     {
+        ArgumentNullException.ThrowIfNull(configure);
+
         var arrayMapper = new SimpleArrayMapper<T, TValue?>(name);
 
         configure(arrayMapper);
@@ -37,6 +41,8 @@ public static class ConfigurationMapperArrayExtensions
         where TMapper : BaseConfigurationMapper<T>
         where TValue : struct, IFormattable
     {
+        ArgumentNullException.ThrowIfNull(configure);
+
         var arrayMapper = new SimpleArrayMapper<T, TValue>(nameExpression);
 
         configure(arrayMapper);
@@ -51,6 +57,8 @@ public static class ConfigurationMapperArrayExtensions
         where TMapper : BaseConfigurationMapper<T>
         where TValue : struct, IFormattable
     {
+        ArgumentNullException.ThrowIfNull(configure);
+
         var arrayMapper = new SimpleArrayMapper<T, TValue?>(nameExpression);
 
         configure(arrayMapper);
@@ -64,6 +72,8 @@ public static class ConfigurationMapperArrayExtensions
         where T : class
         where TMapper : BaseConfigurationMapper<T>
     {
+        ArgumentNullException.ThrowIfNull(configure);
+
         var arrayMapper = new SimpleArrayMapper<T, string?>(nameExpression);
 
         configure(arrayMapper);
@@ -77,6 +87,8 @@ public static class ConfigurationMapperArrayExtensions
         where T : class
         where TMapper : BaseConfigurationMapper<T>
     {
+        ArgumentNullException.ThrowIfNull(configure);
+
         var arrayMapper = new SimpleArrayMapper<T, string?>(name);
 
         configure(arrayMapper);
@@ -90,6 +102,8 @@ public static class ConfigurationMapperArrayExtensions
         where T : class
         where TMapper : BaseConfigurationMapper<T>
     {
+        ArgumentNullException.ThrowIfNull(configure);
+
         var objectMapper = new ComplexArrayMapper<T>(name);
 
         configure(objectMapper);
@@ -102,6 +116,8 @@ public static class ConfigurationMapperArrayExtensions
         where T : class
         where TMapper : BaseConfigurationMapper<T>
     {
+        ArgumentNullException.ThrowIfNull(configure);
+
         var objectMapper = new ComplexArrayMapper<T>(nameExpression);
 
         configure(objectMapper);
