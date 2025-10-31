@@ -9,6 +9,8 @@ public static class ConfigurationMapperObjectExtensions
         where T : class
         where TMapper : BaseConfigurationMapper<T>
     {
+        ArgumentNullException.ThrowIfNull(configure);
+
         var namedObjectElement = new NamedObjectElement<T>(name);
         var objectMapper = new ObjectMapper<T>(namedObjectElement);
         configure(objectMapper);
@@ -20,6 +22,8 @@ public static class ConfigurationMapperObjectExtensions
         where T : class
         where TMapper : BaseConfigurationMapper<T>
     {
+        ArgumentNullException.ThrowIfNull(configure);
+
         var namedObjectElement = new NamedObjectElement<T>(nameExpression);
         var objectMapper = new ObjectMapper<T>(namedObjectElement);
         configure(objectMapper);
@@ -32,6 +36,8 @@ public static class ConfigurationMapperObjectExtensions
         where TMapper : BaseConfigurationMapper<T>
         where TObject : class
     {
+        ArgumentNullException.ThrowIfNull(configure);
+
         var namedObjectElement = new NamedObjectElement<T>(name);
         var objectMapper = new TypedObjectMapper<T, TObject>(namedObjectElement);
         configure(objectMapper);
@@ -44,6 +50,8 @@ public static class ConfigurationMapperObjectExtensions
         where TMapper : BaseConfigurationMapper<T>
         where TObject : class
     {
+        ArgumentNullException.ThrowIfNull(configure);
+
         var namedObjectElement = new NamedObjectElement<T>(nameExpression);
         var objectMapper = new TypedObjectMapper<T, TObject>(namedObjectElement);
         configure(objectMapper);
