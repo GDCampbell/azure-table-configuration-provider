@@ -56,7 +56,7 @@ public static class ConfigurationMapperValueExtensions
         where TMapper : BaseConfigurationMapper<T>
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
-        var element = ValueElement<T>.CreateFrom(valueExpression);
+        var element = ValueElement<T>.CreateFrom(valueExpression, key);
         mapper.Container.Add(element);
 
         return mapper;
