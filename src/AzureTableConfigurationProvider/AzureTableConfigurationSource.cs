@@ -9,8 +9,8 @@ namespace AzureTable.Provider;
 internal sealed class AzureTableConfigurationSource<TEntity>(
     IConfiguration configurationSnapshot,
     Action<ProviderConfigurationBuilder<TEntity>> configure
-    ) 
-    : IConfigurationSource 
+    )
+    : IConfigurationSource
     where TEntity : class, ITableEntity
 {
     public IConfigurationProvider Build(IConfigurationBuilder builder)
@@ -21,12 +21,17 @@ internal sealed class AzureTableConfigurationSource<TEntity>(
         var (tableFactory, mappingBuilderConfiguration, queryConfiguration) = providerBuilder.Build();
 
         var tableClient = tableFactory(configurationSnapshot);
-        
-        var mappingBuilder = new ConfigurationMapperBuilder<TEntity>();
+
+        var mappingBuilder = new ConfigurationMapper<TEntity>();
 
         mappingBuilderConfiguration(mappingBuilder, configurationSnapshot);
 
-        var mappingRoot = mappingBuilder.Build();
+        var mappingRoot = mappingBuilder.Element;
+
+        if (!mappingRoot.HasElements)
+        {
+            throw new InvalidOperationException("At least one mapping element must be configured.");
+        }
 
         TableQueryConfiguration? query = null;
 

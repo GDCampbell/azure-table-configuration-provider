@@ -32,4 +32,23 @@ internal static class ExpressionExtensions
 
         throw new ArgumentException("Invalid expression. Expected member access, unary expression, or indexer access.", nameof(expression));
     }
+
+    public static Func<T, string?> ToValueFactory<T, TValue>(this Expression<Func<T, TValue>> expression) where T : class
+    {
+        var compiled = expression.Compile();
+        
+        string? ValueFactory(T instance)
+            => compiled(instance).ToInvariantString();
+
+        return ValueFactory;
+    }
+
+    public static string? ToInvariantString<T>(this T? value)
+        => value switch
+        {
+            null => null,
+            string str => str,
+            IFormattable formattable => formattable.ToString(null, System.Globalization.CultureInfo.InvariantCulture),
+            _ => value.ToString()
+        };
 }
