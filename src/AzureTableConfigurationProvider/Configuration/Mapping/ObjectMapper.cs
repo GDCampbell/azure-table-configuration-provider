@@ -80,8 +80,6 @@ public sealed class TypedObjectMapper<TEntity, TObject> : BaseConfigurationMappe
         var valueElement = ValueElement<TEntity>.CreateFrom(valueFactory, keyExpression.GetMemberName());
         Container.Add(valueElement);
 
-
-
         return this;
     }
 
@@ -96,10 +94,17 @@ public sealed class TypedObjectMapper<TEntity, TObject> : BaseConfigurationMappe
         return this;
     }
 
-    public TypedObjectMapper<TEntity, TObject> AddMappedComplexObject<TValue>(Expression<Func<TObject, IEnumerable<TValue>>> keyExpression, Action<TypedComplexArrayMapper<TEntity, TValue>> configure)
+    public TypedObjectMapper<TEntity, TObject> AddMappedComplexArray<TValue>(Expression<Func<TObject, IEnumerable<TValue>>> keyExpression, Action<TypedComplexArrayMapper<TEntity, TValue>> configure)
         where TValue : class
     {
+        ArgumentNullException.ThrowIfNull(keyExpression);
+        ArgumentNullException.ThrowIfNull(configure);
 
+        var complexTypedArray = new TypedComplexArrayMapper<TEntity, TValue>(keyExpression.GetMemberName());
+
+        configure(complexTypedArray);
+
+        Container.Add(complexTypedArray.Element);
 
         return this;
     }
