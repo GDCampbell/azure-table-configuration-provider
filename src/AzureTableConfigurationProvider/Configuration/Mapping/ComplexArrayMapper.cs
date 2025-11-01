@@ -16,6 +16,8 @@ public sealed class ComplexArrayMapper<TEntity>
 
     public ComplexArrayMapper<TEntity> AddItem(Action<ObjectMapper<TEntity>> configure)
     {
+        ArgumentNullException.ThrowIfNull(configure);
+
         var objectElement = new ObjectElement<TEntity>();
         var objectMapper = new ObjectMapper<TEntity>(objectElement);
 
@@ -41,6 +43,8 @@ public sealed class TypedComplexArrayMapper<TEntity, TObject>
 
     public TypedComplexArrayMapper<TEntity, TObject> AddItem(Action<TypedObjectMapper<TEntity, TObject>> configure)
     {
+        ArgumentNullException.ThrowIfNull(configure);
+
         var objectElement = new ObjectElement<TEntity>();
         var typedObjectMapper = new TypedObjectMapper<TEntity, TObject>(objectElement);
 
